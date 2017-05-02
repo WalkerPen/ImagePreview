@@ -11,4 +11,10 @@
         android:layout_height="match_parent"
         android:id="@+id/view_pager"></android.support.v4.view.ViewPager>
 
+    <com.pen.imagepreview.libs.circleindicator.CircleIndicator
+        android:id="@+id/indicator"
+        android:layout_alignParentBottom="true"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"/>
+
 </RelativeLayout>
