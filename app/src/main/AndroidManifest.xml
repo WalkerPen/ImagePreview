@@ -17,8 +17,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".libs.ImagePreviewActivity"
-            android:theme="@style/Theme">
+        <activity android:name=".libs.ImagePreviewActivity">
         </activity>
     </application>
 

@@ -3,10 +3,12 @@ package com.pen.imagepreview;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 
 import com.pen.imagepreview.libs.ImagePreviewActivity;
+import com.pen.imagepreview.libs.JumpBean;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,8 +39,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         switch (v.getId()) {
             case R.id.image:
                 Intent intent = new Intent(this, ImagePreviewActivity.class);
-                intent.putStringArrayListExtra(ImagePreviewActivity.KEY_IMAGE_ARRAY, mImages);
-                intent.putExtra(ImagePreviewActivity.KEY_INDEX, 0);
+                JumpBean jumpBean = new JumpBean();
+                jumpBean.mImages = mImages;
+                jumpBean.x = mImage.getX();
+                jumpBean.y = mImage.getY();
+                jumpBean.width = mImage.getWidth();
+                jumpBean.height = mImage.getHeight();
+                intent.putExtra("data", jumpBean);
                 startActivity(intent);
                 overridePendingTransition(0, 0);
                 break;

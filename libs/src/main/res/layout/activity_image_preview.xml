@@ -6,15 +6,55 @@
     android:layout_height="match_parent"
     tools:context="com.pen.imagepreview.libs.ImagePreviewActivity">
 
-    <android.support.v4.view.ViewPager
+    <View
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/view_pager"></android.support.v4.view.ViewPager>
+        android:background="#000"
+        android:id="@+id/view_background"/>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/rl_container">
+
+        <android.support.v4.view.ViewPager
+            android:id="@+id/view_pager"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"></android.support.v4.view.ViewPager>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:background="#000"
+            android:layout_alignParentTop="true"
+            android:id="@+id/view_top"/>
+
+        <View
+            android:id="@+id/view_bottom"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:background="#000"
+            android:layout_alignParentBottom="true"/>
+
+        <View
+            android:id="@+id/view_left"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:background="#000"
+            android:layout_alignParentLeft="true"/>
+
+        <View
+            android:id="@+id/view_right"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:background="#000"
+            android:layout_alignParentRight="true"/>
+    </RelativeLayout>
 
     <com.pen.imagepreview.libs.circleindicator.CircleIndicator
         android:id="@+id/indicator"
-        android:layout_alignParentBottom="true"
         android:layout_width="match_parent"
-        android:layout_height="48dp"/>
+        android:layout_height="48dp"
+        android:layout_alignParentBottom="true"/>
 
 </RelativeLayout>
