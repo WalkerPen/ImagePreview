@@ -7,12 +7,27 @@
     tools:context="com.pen.imagepreview.MainActivity">
 
     <ImageView
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:src="@drawable/biting"
+        android:scaleType="centerCrop"
+        android:id="@+id/image"/>
+
+    <ImageView
         android:layout_alignParentRight="true"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:src="@drawable/biting2"
+        android:scaleType="centerCrop"
+        android:layout_centerInParent="true"
+        android:id="@+id/image2"/>
+
+    <ImageView
+        android:layout_alignParentBottom="true"
         android:layout_width="100dp"
         android:layout_height="100dp"
         android:src="@drawable/biting4"
         android:scaleType="centerCrop"
-        android:layout_centerInParent="true"
-        android:id="@+id/image"/>
+        android:id="@+id/image3"/>
 
 </RelativeLayout>

@@ -12,30 +12,29 @@ import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
-import com.bumptech.glide.BitmapTypeRequest;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.target.Target;
 import com.pen.imagepreview.libs.circleindicator.CircleIndicator;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class ImagePreviewActivity extends AppCompatActivity {
+public class ImagePreviewActivity extends AppCompatActivity{
 
 
     private ViewPager mViewPager;
-    private ArrayList<String> mImages;
     private CircleIndicator mIndicator;
     private int mIndex;
-    private JumpBean mJumpBean;
+    private ExitAlphaJumpBean mExitAlphaJumpBean;
+    private ExitScaleJumpBean mExitScaleJumpBean;
     private int mMaxWidth; //ViewPager的放大后宽度
     private int mMinWidth; //ViewPager的缩小后宽度
     private int mMaxHeight; //ViewPager的放大后高度
@@ -50,6 +49,7 @@ public class ImagePreviewActivity extends AppCompatActivity {
     private View mViewRight;
     private View mViewBottom;
     private boolean mHigher;//true表示图片比ImageView相对要高，false表示相对要宽
+    private boolean mExitScale;//true表示退出时缩放效果，false表示退出时透明度渐变
     private View mViewBackground;
 
     @Override
@@ -68,8 +68,6 @@ public class ImagePreviewActivity extends AppCompatActivity {
     }
 
     private void startEnterAnimator() {
-        ViewCompat.setX(mRlContainer, mJumpBean.x);
-        ViewCompat.setY(mRlContainer, mJumpBean.y);
         mRlContainer.getLayoutParams().width = mMinWidth;
         mRlContainer.getLayoutParams().height = mMinHeight;
         mRlContainer.requestLayout();
@@ -110,10 +108,18 @@ public class ImagePreviewActivity extends AppCompatActivity {
             }
         });
         ValueAnimator animatorShield = null;
-        if(mHigher) {
-            animatorShield = ValueAnimator.ofInt((mMinHeight - mJumpBean.height)/2, 0);
+        if(mExitScale) {
+            if(mHigher) {
+                animatorShield = ValueAnimator.ofInt((mMinHeight - mExitScaleJumpBean.images.get(mIndex).height)/2, 0);
+            }else {
+                animatorShield = ValueAnimator.ofInt((mMinWidth - mExitScaleJumpBean.images.get(mIndex).width)/2, 0);
+            }
         }else {
-            animatorShield = ValueAnimator.ofInt((mMinWidth - mJumpBean.width)/2, 0);
+            if(mHigher) {
+                animatorShield = ValueAnimator.ofInt((mMinHeight - mExitAlphaJumpBean.height)/2, 0);
+            }else {
+                animatorShield = ValueAnimator.ofInt((mMinWidth - mExitAlphaJumpBean.width)/2, 0);
+            }
         }
         animatorShield.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
@@ -174,10 +180,18 @@ public class ImagePreviewActivity extends AppCompatActivity {
             }
         });
         ValueAnimator animatorShield = null;
-        if(mHigher) {
-            animatorShield = ValueAnimator.ofInt(0, (mMinHeight - mJumpBean.height)/2);
+        if(mExitScale) {
+            if(mHigher) {
+                animatorShield = ValueAnimator.ofInt(0, (mMinHeight - mExitScaleJumpBean.images.get(mIndex).height)/2);
+            }else {
+                animatorShield = ValueAnimator.ofInt(0, (mMinWidth - mExitScaleJumpBean.images.get(mIndex).width)/2);
+            }
         }else {
-            animatorShield = ValueAnimator.ofInt(0, (mMinWidth - mJumpBean.width)/2);
+            if(mHigher) {
+                animatorShield = ValueAnimator.ofInt(0, (mMinHeight - mExitAlphaJumpBean.height)/2);
+            }else {
+                animatorShield = ValueAnimator.ofInt(0, (mMinWidth - mExitAlphaJumpBean.width)/2);
+            }
         }
         animatorShield.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
@@ -224,8 +238,16 @@ public class ImagePreviewActivity extends AppCompatActivity {
     }
 
     private void initData() {
-        mJumpBean = (JumpBean) getIntent().getSerializableExtra("data");
-        mImages = mJumpBean.mImages;
+        Serializable serializable = getIntent().getSerializableExtra("data");
+        if(serializable instanceof ExitAlphaJumpBean) {
+            mExitAlphaJumpBean = (ExitAlphaJumpBean) serializable;
+            mExitScale = false;
+            mIndex = mExitAlphaJumpBean.index;
+        }else if(serializable instanceof ExitScaleJumpBean) {
+            mExitScaleJumpBean = (ExitScaleJumpBean) serializable;
+            mIndex = mExitScaleJumpBean.index;
+            mExitScale = true;
+        }
     }
 
     private void initView() {
@@ -240,6 +262,14 @@ public class ImagePreviewActivity extends AppCompatActivity {
 
         MyPagerAdapter adapter = new MyPagerAdapter();
         mViewPager.setAdapter(adapter);
+        mViewPager.setCurrentItem(mIndex);
+        mViewPager.addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
+            @Override
+            public void onPageSelected(int position) {
+                mIndex = position;
+                upDataScale();
+            }
+        });
         mIndicator.setViewPager(mViewPager);
     }
 
@@ -254,8 +284,14 @@ public class ImagePreviewActivity extends AppCompatActivity {
                 mMaxX = mRlContainer.getX();
                 mMaxY = mRlContainer.getY();
 
+                Object iamge = null;
+                if(mExitScale) {
+                    iamge = mExitScaleJumpBean.images.get(mIndex).image;
+                }else {
+                    iamge = mExitAlphaJumpBean.images.get(mIndex);
+                }
                 Glide.with(ImagePreviewActivity.this)
-                        .load(R.drawable.biting4)
+                        .load(iamge)
                         .asBitmap()
                         .into(new SimpleTarget<Bitmap>(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL) {
 
@@ -276,29 +312,68 @@ public class ImagePreviewActivity extends AppCompatActivity {
         });
     }
 
+    private void upDataScale() {
+        Object iamge = null;
+        if(mExitScale) {
+            iamge = mExitScaleJumpBean.images.get(mIndex).image;
+        }else {
+            iamge = mExitAlphaJumpBean.images.get(mIndex);
+        }
+        Glide.with(ImagePreviewActivity.this)
+                .load(iamge)
+                .asBitmap()
+                .into(new SimpleTarget<Bitmap>(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL) {
+
+                    @Override
+                    public void onResourceReady(Bitmap bitmap, GlideAnimation glideAnimation) {
+                        // Do something with bitmap here.
+                        int height = bitmap.getHeight();
+                        int width = bitmap.getWidth();
+
+                        //初始化最小的尺寸及对应起点坐标
+                        initMinSize(height, width);
+                    }
+
+                });
+    }
+
     /**
      * 初始化最小的尺寸及对应起点坐标
      * @param height
      * @param width
      */
     private void initMinSize(int height, int width) {
-        if ((height * 1f / width) > (mJumpBean.height * 1f / mJumpBean.width)) {
-            mHigher = true;
-            mMinHeight = height * mJumpBean.width / width;
-            mMinWidth = mMinHeight * mJumpBean.width / mJumpBean.height;
-        } else {
-            mMinWidth = width * mJumpBean.height / height;
-            mMinHeight = mMinWidth * mJumpBean.height / mJumpBean.width;
-            mHigher = false;
+        if(mExitScale) {
+            if ((height * 1f / width) > (mExitScaleJumpBean.images.get(mIndex).height * 1f / mExitScaleJumpBean.images.get(mIndex).width)) {
+                mHigher = true;
+                mMinHeight = height * mExitScaleJumpBean.images.get(mIndex).width / width;
+                mMinWidth = mMinHeight * mExitScaleJumpBean.images.get(mIndex).width / mExitScaleJumpBean.images.get(mIndex).height;
+            } else {
+                mMinWidth = width * mExitScaleJumpBean.images.get(mIndex).height / height;
+                mMinHeight = mMinWidth * mExitScaleJumpBean.images.get(mIndex).height / mExitScaleJumpBean.images.get(mIndex).width;
+                mHigher = false;
+            }
+            mMinX = mExitScaleJumpBean.images.get(mIndex).x - (mMinWidth - mExitScaleJumpBean.images.get(mIndex).width) / 2;
+            mMinY = mExitScaleJumpBean.images.get(mIndex).y - (mMinHeight - mExitScaleJumpBean.images.get(mIndex).height) / 2;
+        }else {
+            if ((height * 1f / width) > (mExitAlphaJumpBean.height * 1f / mExitAlphaJumpBean.width)) {
+                mHigher = true;
+                mMinHeight = height * mExitAlphaJumpBean.width / width;
+                mMinWidth = mMinHeight * mExitAlphaJumpBean.width / mExitAlphaJumpBean.height;
+            } else {
+                mMinWidth = width * mExitAlphaJumpBean.height / height;
+                mMinHeight = mMinWidth * mExitAlphaJumpBean.height / mExitAlphaJumpBean.width;
+                mHigher = false;
+            }
+            mMinX = mExitAlphaJumpBean.x - (mMinWidth - mExitAlphaJumpBean.width) / 2;
+            mMinY = mExitAlphaJumpBean.y - (mMinHeight - mExitAlphaJumpBean.height) / 2;
         }
-        mMinX = mJumpBean.x - (mMinWidth - mJumpBean.width) / 2;
-        mMinY = mJumpBean.y - (mMinHeight - mJumpBean.height) / 2;
     }
 
     private class MyPagerAdapter extends PagerAdapter {
         @Override
         public int getCount() {
-            return mImages.size();
+            return mExitScale ? mExitScaleJumpBean.images.size() : mExitAlphaJumpBean.images.size();
         }
 
         @Override
@@ -311,9 +386,15 @@ public class ImagePreviewActivity extends AppCompatActivity {
             ImageView imageView = new ImageView(container.getContext());
 
             imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
-            Glide.with(ImagePreviewActivity.this)
-                    .load(R.drawable.biting4)
-                    .into(imageView);
+            if(mExitScale) {
+                Glide.with(ImagePreviewActivity.this)
+                        .load(mExitScaleJumpBean.images.get(position).image)
+                        .into(imageView);
+            }else {
+                Glide.with(ImagePreviewActivity.this)
+                        .load(mExitAlphaJumpBean.images.get(position))
+                        .into(imageView);
+            }
             container.addView(imageView);
             return imageView;
         }
