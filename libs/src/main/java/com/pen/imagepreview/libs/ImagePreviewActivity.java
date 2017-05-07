@@ -12,6 +12,7 @@ import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
@@ -60,11 +61,6 @@ public class ImagePreviewActivity extends AppCompatActivity{
         initData();
         initView();
         initScale();
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
     }
 
     private void startEnterAnimator() {
@@ -138,8 +134,7 @@ public class ImagePreviewActivity extends AppCompatActivity{
         });
         AnimatorSet set = new AnimatorSet();
         set.play(animatorX).with(animatorY).with(animatorWidth).with(animatorAlpha).with(animatorShield).with(animatorHeight);
-        set.setDuration(300);
-        set.setInterpolator(null);
+        set.setDuration(200);
         set.start();
     }
 
@@ -211,8 +206,7 @@ public class ImagePreviewActivity extends AppCompatActivity{
 
         AnimatorSet set = new AnimatorSet();
         set.play(animatorX).with(animatorY).with(animatorWidth).with(animatorAlpha).with(animatorShield).with(animatorHeight);
-        set.setDuration(300);
-        set.setInterpolator(null);
+        set.setDuration(200);
         set.addListener(new Animator.AnimatorListener() {
             @Override
             public void onAnimationStart(Animator animation) {
@@ -235,6 +229,7 @@ public class ImagePreviewActivity extends AppCompatActivity{
             }
         });
         set.start();
+        long end = System.currentTimeMillis();
     }
 
     private void initData() {
@@ -259,7 +254,9 @@ public class ImagePreviewActivity extends AppCompatActivity{
         mViewRight = findViewById(R.id.view_right);
         mViewBottom = findViewById(R.id.view_bottom);
         mViewBackground = findViewById(R.id.view_background);
+    }
 
+    private void initViewPager() {
         MyPagerAdapter adapter = new MyPagerAdapter();
         mViewPager.setAdapter(adapter);
         mViewPager.setCurrentItem(mIndex);
@@ -305,6 +302,8 @@ public class ImagePreviewActivity extends AppCompatActivity{
                                 initMinSize(height, width);
 
                                 startEnterAnimator();
+
+                                initViewPager();
                             }
 
                         });

@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
 
+import com.bumptech.glide.Glide;
 import com.pen.imagepreview.libs.ExitScaleJumpBean;
 import com.pen.imagepreview.libs.ImagePreviewActivity;
 import com.pen.imagepreview.libs.ExitAlphaJumpBean;
@@ -39,6 +40,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mImage2.setOnClickListener(this);
         mImage3.setOnClickListener(this);
 
+        Glide.with(this).load(mImages.get(0)).into(mImage);
+        Glide.with(this).load(mImages.get(1)).into(mImage2);
+        Glide.with(this).load(mImages.get(2)).into(mImage3);
     }
 
     @Override
